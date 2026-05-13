@@ -123,14 +123,13 @@ function analyze() {
   }
 
   if (!state.drinks.length) {
-    addBubble("bot warn", "최근 1주일 동안 마신 카페인 음료를 하나 이상 추가해 주세요.");
+    addBubble("bot warn", "오늘 마신 카페인 음료를 하나 이상 추가해 주세요.");
     return;
   }
 
-  const totalWeekly = state.drinks.reduce((sum, drink) => sum + drink.totalMg, 0);
-  const avgDaily = totalWeekly / 7;
+  const dailyMg = state.drinks.reduce((sum, drink) => sum + drink.totalMg, 0);
   const limit = weight * 2.5;
-  const ratio = avgDaily / limit;
+  const ratio = dailyMg / limit;
   const time = $("time").value;
   const reason = $("reason").value;
   const symptoms = $("symptoms").value.trim();
@@ -139,16 +138,16 @@ function analyze() {
   const exam = $("exam").value;
   const risk = getRisk(ratio, time, symptoms, sleepExam || sleepNormal);
 
-  $("avgMg").textContent = `약 ${Math.round(avgDaily)}mg`;
+  $("avgMg").textContent = `약 ${Math.round(dailyMg)}mg`;
   $("limitMg").textContent = `약 ${Math.round(limit)}mg`;
   $("riskLabel").textContent = risk.label;
 
   $("chat").innerHTML = "";
-  addBubble("user", buildUserSummary(avgDaily, limit, time, reason, symptoms));
-  addBubble(`bot ${risk.className}`, buildCoachMessage({ avgDaily, limit, ratio, time, reason, symptoms, sleepNormal, sleepExam, exam, risk }));
+  addBubble("user", buildUserSummary(dailyMg, limit, time, reason, symptoms));
+  addBubble(`bot ${risk.className}`, buildCoachMessage({ dailyMg, limit, ratio, time, reason, symptoms, sleepNormal, sleepExam, exam, risk }));
   addBubble("bot", buildPlan(reason, time, symptoms));
 
-  $("promptOutput").value = buildPrompt({ weight, avgDaily, limit, time, reason, symptoms, sleepNormal, sleepExam, exam });
+  $("promptOutput").value = buildPrompt({ weight, dailyMg, limit, time, reason, symptoms, sleepNormal, sleepExam, exam });
 }
 
 function getRisk(ratio, time, symptoms, sleepHours) {
@@ -161,10 +160,10 @@ function getRisk(ratio, time, symptoms, sleepHours) {
   return { label: "낮은 편", className: "" };
 }
 
-function buildUserSummary(avgDaily, limit, time, reason, symptoms) {
+function buildUserSummary(dailyMg, limit, time, reason, symptoms) {
   return `
     <strong>내 입력 요약</strong>
-    <p>하루 평균 카페인은 약 ${Math.round(avgDaily)}mg, 내 권고량은 약 ${Math.round(limit)}mg입니다. 주로 ${time}에 마시고, 이유는 ${reason}입니다.${symptoms ? ` 선택 입력 증상은 “${escapeHtml(symptoms)}”입니다.` : ""}</p>
+    <p>오늘 카페인은 약 ${Math.round(dailyMg)}mg, 내 하루 권고량은 약 ${Math.round(limit)}mg입니다. 주로 ${time}에 마시고, 이유는 ${reason}입니다.${symptoms ? ` 선택 입력 증상은 “${escapeHtml(symptoms)}”입니다.` : ""}</p>
   `;
 }
 
@@ -202,7 +201,7 @@ function buildCoachMessage(data) {
 function buildPlan(reason, time, symptoms) {
   const plan = [];
   if (time === "밤 10시 이후") {
-    plan.push("1주일 동안 밤 10시 이후에는 카페인 음료를 마시지 않기");
+    plan.push("오늘부터 밤 10시 이후에는 카페인 음료를 마시지 않기");
   } else {
     plan.push("카페인 음료를 마시는 시간을 오후 늦게보다 앞 시간대로 당기기");
   }
@@ -215,10 +214,10 @@ function buildPlan(reason, time, symptoms) {
     plan.push("카페인을 찾는 상황을 기록하고, 그 전에 할 수 있는 대체 행동 하나 정하기");
   }
 
-  plan.push("마신 음료, 시간, 수면 시간을 1주일 동안 간단히 기록하기");
+  plan.push("오늘부터 마신 음료, 시간, 수면 시간을 간단히 기록하기");
 
   return `
-    <strong>1주일 실천 계획</strong>
+    <strong>실천 계획</strong>
     <ul>${plan.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
     <p>${symptoms ? "증상이 지속되면 혼자 버티지 말고 상담을 받는 것이 좋습니다." : "증상이 없다면 기록을 통해 시간대와 습관부터 조정해 보세요."}</p>
   `;
@@ -230,7 +229,7 @@ function buildPrompt(data) {
     .join("\n");
 
   return `너의 역할은 청소년의 카페인 섭취 습관을 점검해 주는 건강 습관 코치야.
-목표는 내가 입력한 음료 종류와 용량을 바탕으로 하루 평균 카페인 섭취량을 추정하고, 청소년 권고량과 비교해서 무리하지 않고 실천 가능한 개선안을 제안하는 거야.
+목표는 내가 입력한 오늘의 음료 종류와 용량을 바탕으로 하루 카페인 섭취량을 추정하고, 청소년 권고량과 비교해서 무리하지 않고 실천 가능한 개선안을 제안하는 거야.
 
 주의할 점:
 - 정확한 함량을 모르면 “추정치”라고 표시해 줘.
@@ -243,7 +242,7 @@ function buildPrompt(data) {
 2. 체중: ${data.weight}kg
 3. 평소 수면 시간: ${data.sleepNormal || "미입력"}시간
 4. 시험 기간 수면 시간: ${data.sleepExam || "미입력"}시간
-5. 최근 1주일 동안 마신 카페인 음료:
+5. 오늘 마신 카페인 음료:
 ${drinkRecords}
 6. 주로 마신 시간대: ${data.time}
 7. 마신 이유: ${data.reason}
@@ -251,11 +250,11 @@ ${drinkRecords}
 9. 선택 입력 - 마신 뒤 증상: ${data.symptoms || "없음/미입력"}
 
 위 내용을 바탕으로 아래 형식으로 답해 줘.
-1. 내 하루 평균 카페인 섭취량 추정
+1. 내 하루 카페인 섭취량 추정
 2. 청소년 권고량(체중 x 2.5mg)과 비교
 3. 가장 조심해야 할 섭취 시간대
 4. 내가 카페인을 찾는 가장 큰 이유 분석
-5. 오늘부터 할 수 있는 1주일 실천 계획 3가지
+5. 오늘부터 할 수 있는 실천 계획 3가지
 6. 카페인 대신 사용할 수 있는 대체 행동 3가지`;
 }
 
@@ -296,7 +295,7 @@ function resetAll() {
   $("chat").innerHTML = `
     <div class="bubble bot">
       <strong>카페인 코치</strong>
-      <p>왼쪽에 최근 1주일 동안 마신 음료를 입력하면 카페인 섭취량을 추정하고 실천 계획을 제안할게요.</p>
+      <p>왼쪽에 오늘 마신 음료를 입력하면 하루 카페인 섭취량을 추정하고 실천 계획을 제안할게요.</p>
     </div>
   `;
   renderDrinkList();

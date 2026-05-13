@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>카페인 루틴 상담</title>
+    <meta name="description" content="고등학생을 위한 카페인 섭취 습관 점검 페이지">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Great Books Activity</p>
+        <h1>카페인 루틴 상담</h1>
+      </div>
+      <p class="top-note">입력한 음료 기록으로 카페인 섭취량을 추정하고, 1주일 실천 계획을 받아보세요.</p>
+    </header>
+
+    <main class="layout">
+      <section class="panel form-panel" aria-labelledby="form-title">
+        <div class="section-head">
+          <h2 id="form-title">내 정보 입력</h2>
+          <p>카페인 mg을 몰라도 됩니다. 마신 음료와 용량만 적으면 페이지가 추정합니다.</p>
+        </div>
+
+        <div class="grid-two">
+          <label>
+            체중
+            <span class="input-unit">
+              <input id="weight" type="number" min="20" max="120" placeholder="예: 60">
+              <span>kg</span>
+            </span>
+          </label>
+          <label>
+            시험 기간
+            <select id="exam">
+              <option value="아니오">아니오</option>
+              <option value="예">예</option>
+            </select>
+          </label>
+          <label>
+            평소 수면 시간
+            <span class="input-unit">
+              <input id="sleepNormal" type="number" min="0" max="14" step="0.5" placeholder="예: 7">
+              <span>시간</span>
+            </span>
+          </label>
+          <label>
+            시험 기간 수면 시간
+            <span class="input-unit">
+              <input id="sleepExam" type="number" min="0" max="14" step="0.5" placeholder="예: 5.5">
+              <span>시간</span>
+            </span>
+          </label>
+        </div>
+
+        <hr>
+
+        <div class="section-head compact">
+          <h2>마신 음료 기록</h2>
+          <p>최근 1주일 기준으로 추가하세요. 제품 표시를 알면 직접 입력을 선택할 수 있습니다.</p>
+        </div>
+
+        <div class="drink-entry">
+          <label>
+            음료 종류
+            <select id="drinkType"></select>
+          </label>
+          <label>
+            용량
+            <span class="input-unit">
+              <input id="drinkMl" type="number" min="30" max="1000" step="10">
+              <span>mL</span>
+            </span>
+          </label>
+          <label>
+            횟수
+            <span class="input-unit">
+              <input id="drinkCount" type="number" min="1" max="30" value="1">
+              <span>회</span>
+            </span>
+          </label>
+          <label id="customCaffeineWrap" class="hidden">
+            카페인
+            <span class="input-unit">
+              <input id="customCaffeine" type="number" min="0" max="500" placeholder="1회 기준">
+              <span>mg</span>
+            </span>
+          </label>
+          <button id="addDrink" type="button">추가</button>
+        </div>
+
+        <div id="drinkList" class="drink-list" aria-live="polite"></div>
+
+        <div class="grid-two">
+          <label>
+            주로 마신 시간대
+            <select id="time">
+              <option>등교 전</option>
+              <option>점심 이후</option>
+              <option>야자 또는 학원 전</option>
+              <option>밤 10시 이후</option>
+              <option>기타</option>
+            </select>
+          </label>
+          <label>
+            가장 큰 이유
+            <select id="reason">
+              <option>졸려서</option>
+              <option>시험공부</option>
+              <option>맛</option>
+              <option>습관</option>
+              <option>친구 영향</option>
+              <option>스트레스</option>
+              <option>기타</option>
+            </select>
+          </label>
+          <label>
+            카페인 표시 확인
+            <select id="labelCheck">
+              <option>확인하지 않음</option>
+              <option>확인함</option>
+            </select>
+          </label>
+          <label>
+            선택 입력: 증상
+            <input id="symptoms" type="text" placeholder="예: 불면, 두근거림 / 없으면 비워두기">
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="analyze" type="button">상담 받기</button>
+          <button id="reset" type="button" class="secondary">초기화</button>
+        </div>
+      </section>
+
+      <section class="panel chat-panel" aria-labelledby="chat-title">
+        <div class="section-head">
+          <h2 id="chat-title">상담 결과</h2>
+          <p>의료 진단이 아니라 생활습관 점검용입니다.</p>
+        </div>
+
+        <div id="summaryCards" class="summary-cards">
+          <article>
+            <span>하루 평균</span>
+            <strong id="avgMg">-</strong>
+          </article>
+          <article>
+            <span>권고량</span>
+            <strong id="limitMg">-</strong>
+          </article>
+          <article>
+            <span>상태</span>
+            <strong id="riskLabel">입력 전</strong>
+          </article>
+        </div>
+
+        <div id="chat" class="chat" aria-live="polite">
+          <div class="bubble bot">
+            <strong>카페인 코치</strong>
+            <p>왼쪽에 최근 1주일 동안 마신 음료를 입력하면 카페인 섭취량을 추정하고 실천 계획을 제안할게요.</p>
+          </div>
+        </div>
+
+        <div class="prompt-box">
+          <div class="prompt-title">
+            <h3>ChatGPT로 이어서 상담하기</h3>
+            <button id="copyPrompt" type="button" class="secondary">프롬프트 복사</button>
+          </div>
+          <textarea id="promptOutput" readonly placeholder="상담을 받으면 ChatGPT에 붙여넣을 프롬프트가 생성됩니다."></textarea>
+          <a class="chatgpt-link" href="https://chatgpt.com/" target="_blank" rel="noreferrer">ChatGPT 열기</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>개인정보 보호: 이름, 학교명, 연락처는 입력하지 마세요. 심한 불면, 두근거림, 흉통, 불안이 지속되면 보건교사나 의료 전문가에게 상담하세요.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+

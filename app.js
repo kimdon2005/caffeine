@@ -1,8 +1,8 @@
 const DRINKS = [
-  { id: "monster-white", name: "몬스터 흰색 355mL", caffeinePerMl: 100 / 355, defaultMl: 355, note: "제품 표시 100mg 기준" },
+  { id: "cafe-coffee", name: "전문점 커피/아메리카노", caffeinePerMl: 132 / 400, defaultMl: 400, note: "질병관리청 예시 400mL 132mg" },
+  { id: "monster", name: "몬스터 355mL", caffeinePerMl: 100 / 355, defaultMl: 355, note: "제품 표시 100mg 기준" },
   { id: "energy", name: "일반 에너지음료", caffeinePerMl: 80 / 250, defaultMl: 250, note: "질병관리청 예시 250mL 80mg" },
   { id: "coffee-bottle", name: "커피음료", caffeinePerMl: 103 / 250, defaultMl: 250, note: "질병관리청 예시 250mL 103mg" },
-  { id: "cafe-coffee", name: "전문점 커피/아메리카노", caffeinePerMl: 132 / 400, defaultMl: 400, note: "질병관리청 예시 400mL 132mg" },
   { id: "coffee-milk", name: "커피우유", caffeinePerMl: 47 / 200, defaultMl: 200, note: "질병관리청 예시 200mL 47mg" },
   { id: "mix", name: "커피믹스", caffeinePerMl: null, defaultMl: 1, fixedMg: 56, unit: "봉", note: "질병관리청 예시 1봉 56mg" },
   { id: "green-tea", name: "녹차 티백", caffeinePerMl: null, defaultMl: 1, fixedMg: 22, unit: "개", note: "질병관리청 예시 티백 1개 22mg" },
@@ -24,6 +24,7 @@ function init() {
     select.appendChild(option);
   });
 
+  select.value = "cafe-coffee";
   select.addEventListener("change", syncDrinkFields);
   $("addDrink").addEventListener("click", addDrink);
   $("analyze").addEventListener("click", analyze);
@@ -31,6 +32,9 @@ function init() {
   $("copyPrompt").addEventListener("click", copyPrompt);
   syncDrinkFields();
   renderDrinkList();
+  if (new URLSearchParams(window.location.search).get("demo") === "1") {
+    loadDemo();
+  }
 }
 
 function selectedDrink() {
@@ -296,6 +300,22 @@ function resetAll() {
     </div>
   `;
   renderDrinkList();
+}
+
+function loadDemo() {
+  $("weight").value = "60";
+  $("exam").value = "아니오";
+  $("sleepNormal").value = "6";
+  $("sleepExam").value = "4";
+  $("drinkType").value = "cafe-coffee";
+  syncDrinkFields();
+  $("drinkCount").value = "1";
+  $("time").value = "점심 이후";
+  $("reason").value = "졸려서";
+  $("labelCheck").value = "확인하지 않음";
+  $("symptoms").value = "두근거림";
+  addDrink();
+  analyze();
 }
 
 function escapeHtml(value) {
